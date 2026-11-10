@@ -1,0 +1,965 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>TMR Content Studio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&family=Figtree:wght@400;500;600&family=Caveat:wght@500;600&display=swap">
+<style>
+/* Layout: a two-pane studio (brief left, output right) with a Library tab holding every piece ever made; stacks to one column on phones */
+:root{
+  --bg:#EEEDEC; --surface:#FAF9F8; --ink:#2B2629; --muted:#6C6468; --line:#DAD5D4;
+  --accent:#6B4A5C; --accent-ink:#FFFFFF; --accent-soft:#EADFE5;
+  --sage:#7F8C78; --warn:#8E5126; --warn-soft:#F5E7DB; --ok:#46663F; --ok-soft:#E3ECDF;
+  --li:#3E5C76; --li-soft:#E1E8EE; --ig:#8A4B62; --ig-soft:#F1E3E8;
+  --slide-bg:#F5F2F0; --slide-ink:#2B2629; --slide-mute:#8A7F84;
+  --display:"Newsreader", Georgia, "Times New Roman", serif;
+  --body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1C191B; --surface:#252124; --ink:#EDE8EA; --muted:#A69DA2; --line:#3A3438;
+    --accent:#C9A3B7; --accent-ink:#1C191B; --accent-soft:#3A2D34;
+    --sage:#A3AE9B; --warn:#E3AE80; --warn-soft:#3A2C22; --ok:#9DBB96; --ok-soft:#26322A;
+    --li:#9DB8D0; --li-soft:#24303A; --ig:#D9A2B6; --ig-soft:#3A2830;
+    --slide-bg:#2E292C; --slide-ink:#EDE8EA; --slide-mute:#A69DA2;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1C191B; --surface:#252124; --ink:#EDE8EA; --muted:#A69DA2; --line:#3A3438;
+  --accent:#C9A3B7; --accent-ink:#1C191B; --accent-soft:#3A2D34;
+  --sage:#A3AE9B; --warn:#E3AE80; --warn-soft:#3A2C22; --ok:#9DBB96; --ok-soft:#26322A;
+  --li:#9DB8D0; --li-soft:#24303A; --ig:#D9A2B6; --ig-soft:#3A2830;
+  --slide-bg:#2E292C; --slide-ink:#EDE8EA; --slide-mute:#A69DA2;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:28px 48px}
+.wrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+header.top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.brand h1{font-family:var(--display);font-weight:400;font-size:clamp(28px,4vw,38px);line-height:1.1;margin:0;text-wrap:balance}
+.brand h1 em{color:var(--accent);font-style:italic}
+.brand p{margin:6px 0 0;color:var(--muted);max-width:62ch}
+.eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px}
+.tabs button{font:inherit;font-weight:500;border:0;background:transparent;color:var(--muted);padding:8px 14px;border-radius:9px;cursor:pointer;display:flex;gap:6px;align-items:center}
+.tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+.count{font-size:12px;font-variant-numeric:tabular-nums;opacity:.85}
+.layout{display:grid;grid-template-columns:minmax(0,370px) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:880px){.layout{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:18px;min-width:0}
+.field{display:flex;flex-direction:column;gap:8px}
+label,.label{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.hint{font-size:12.5px;color:var(--muted);margin:0}
+textarea,input[type=text],input[type=date],input[type=search],select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%}
+textarea{resize:vertical;min-height:84px}
+textarea:focus,input:focus,select:focus,button:focus-visible,[contenteditable]:focus{outline:2px solid var(--accent);outline-offset:2px}
+.seg{display:grid;gap:4px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:4px}
+.seg.c4{grid-template-columns:repeat(2,1fr)}
+.seg.c3{grid-template-columns:repeat(3,1fr)}
+@media (min-width:420px){.seg.c4{grid-template-columns:repeat(4,1fr)}}
+.seg button{font:inherit;font-weight:500;font-size:14px;border:0;background:transparent;color:var(--muted);padding:9px 4px;border-radius:9px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.subs{display:flex;flex-direction:column;gap:6px}
+.sub{font:inherit;text-align:left;background:transparent;border:1px solid var(--line);border-radius:10px;padding:9px 12px;color:var(--ink);cursor:pointer;display:flex;flex-direction:column;gap:2px}
+.sub small{color:var(--muted);font-size:12.5px}
+.sub[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:12.5px;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:5px 10px;cursor:pointer;text-align:left}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn{font:inherit;font-weight:600;border-radius:10px;padding:11px 16px;cursor:pointer;border:1px solid transparent}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.primary:disabled{opacity:.55;cursor:wait}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.ghost:hover{border-color:var(--accent)}
+.btn.small{padding:6px 10px;font-size:12.5px;font-weight:500}
+.btn.danger{color:var(--warn)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.status{font-size:13px;color:var(--muted);min-height:1.5em}
+.status.err{color:var(--warn)}
+
+.out{display:flex;flex-direction:column;gap:18px;min-width:0}
+.outhead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.outhead h2{font-family:var(--display);font-weight:400;font-size:24px;margin:2px 0 0;text-wrap:balance}
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;border-radius:999px;padding:4px 10px;white-space:nowrap}
+.tag.example{background:var(--accent-soft);color:var(--accent)}
+.tag.ok{background:var(--ok-soft);color:var(--ok)}
+.tag.warn{background:var(--warn-soft);color:var(--warn);white-space:normal}
+.tag.li{background:var(--li-soft);color:var(--li)}
+.tag.ig{background:var(--ig-soft);color:var(--ig)}
+.tag.plain{background:var(--bg);color:var(--muted)}
+.block{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.blockhead{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.copytext{white-space:pre-wrap;overflow-wrap:anywhere}
+.hook{font-family:var(--display);font-size:clamp(22px,3vw,28px);line-height:1.2;text-wrap:balance}
+ol.beats{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:8px}
+ol.beats li::marker{color:var(--sage);font-variant-numeric:tabular-nums}
+.va dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0}
+.va dt{font-weight:600;color:var(--muted);font-size:13px}
+.va dd{margin:0}
+.hashtags{font-size:14px;color:var(--accent)}
+.plat{border-left:3px solid var(--line)}
+.plat.linkedin{border-left-color:var(--li)}
+.plat.instagram{border-left-color:var(--ig)}
+
+.slides{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.slide{aspect-ratio:4/5;max-width:100%;background:var(--slide-bg);color:var(--slide-ink);border:1px solid var(--line);border-radius:16px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;gap:10px;min-width:0;overflow:hidden}
+.slide .n{gap:8px;font-size:11px;letter-spacing:.1em;color:var(--slide-mute);font-variant-numeric:tabular-nums;display:flex;justify-content:space-between}
+.slide .h{font-family:var(--display);font-size:21px;line-height:1.18;text-wrap:balance;overflow-wrap:anywhere;white-space:pre-line}
+.slide.first .h{font-size:25px;font-style:italic}
+.slide .b{font-size:13.5px;line-height:1.45;opacity:.82;overflow-wrap:anywhere;white-space:pre-line}
+.slide .mid{display:flex;flex-direction:column;gap:10px;flex:1;justify-content:center;min-height:0;overflow:auto}
+.slide .sig{font-size:11px;color:var(--slide-mute)}
+.single{aspect-ratio:1/1;max-width:340px;width:100%;background:var(--slide-bg);color:var(--slide-ink);border:1px solid var(--line);border-radius:16px;padding:28px;display:flex;flex-direction:column;justify-content:center;gap:14px}
+.single .h{font-family:var(--display);font-size:26px;line-height:1.2;text-wrap:balance;overflow-wrap:anywhere}
+.single .sig{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--slide-mute)}
+[contenteditable]{border-radius:4px}
+[contenteditable]:hover{background:color-mix(in srgb, var(--accent) 6%, transparent)}
+
+/* Quote cards: one fixed "private note" treatment (warm greige paper, brown ink, handwriting, monogram bottom right) */
+.quotes{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.qwrap{display:flex;flex-direction:column;gap:8px;min-width:0}
+.qcard{aspect-ratio:4/5;max-width:100%;background:#E9E3DA;color:#5A3F2E;border-radius:6px;padding:30px 26px 22px;display:flex;flex-direction:column;justify-content:center;gap:12px;overflow:hidden;position:relative;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.qcard .q{font-family:"Caveat", "Segoe Print", "Bradley Hand", cursive;font-weight:500;font-size:27px;line-height:1.22;overflow-wrap:anywhere;white-space:pre-line}
+.qcard .mono{position:absolute;right:16px;bottom:12px;font-family:"Caveat", cursive;font-size:16px;opacity:.7}
+.qcard .rank{position:absolute;left:14px;top:10px;font-family:var(--body);font-size:11px;letter-spacing:.08em;opacity:.55;font-variant-numeric:tabular-nums}
+.qmeta{display:flex;flex-direction:column;gap:2px;font-size:12.5px;color:var(--muted)}
+.qmeta b{color:var(--ink);font-weight:600}
+.qnote{font-size:13px;color:var(--muted)}
+.refine{display:flex;gap:8px;flex-wrap:wrap}
+.refine input{flex:1 1 220px;min-width:0}
+
+/* Library */
+.lib{display:flex;flex-direction:column;gap:16px}
+.libbar{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+.libbar .field{flex:1 1 160px;min-width:0}
+.libbar .field.grow{flex:3 1 240px}
+.liblist{display:flex;flex-direction:column;gap:8px}
+.item{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:start}
+.item h3{margin:0;font-family:var(--display);font-weight:500;font-size:18px;line-height:1.25;overflow-wrap:anywhere}
+.item p{margin:4px 0 0;color:var(--muted);font-size:13.5px;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.item .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.item .side{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+@media (max-width:560px){.item{grid-template-columns:minmax(0,1fr)} .item .side{flex-direction:row;flex-wrap:wrap;align-items:center}}
+.empty{font-size:14px;color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:12px;padding:18px}
+details.import{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 18px}
+details.import summary{cursor:pointer;font-weight:600}
+details.import[open] summary{margin-bottom:14px}
+.importgrid{display:flex;flex-direction:column;gap:12px}
+.row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:560px){.row3{grid-template-columns:1fr}}
+.confirm{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--warn)}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom, 0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:999px;font-size:13px;z-index:20;max-width:calc(100% - 32px)}
+@media (prefers-reduced-motion: no-preference){ .fade{animation:fade .35s ease both} @keyframes fade{from{opacity:.4;transform:translateY(4px)}to{opacity:1;transform:none}} }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="eyebrow">The Motherhood Rework</div>
+      <h1>Content <em>Studio</em></h1>
+      <p>Reels, carousels, single posts and quote cards for Instagram and LinkedIn, in your voice. Every piece is checked against your whole library so nothing repeats.</p>
+    </div>
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" id="tabCreate" aria-selected="true">Create</button>
+      <button type="button" role="tab" id="tabLib" aria-selected="false">Library <span class="count" id="libCount">0</span></button>
+    </div>
+  </header>
+
+  <!-- CREATE -->
+  <div class="layout" id="viewCreate">
+    <aside class="panel" aria-label="Brief">
+      <div class="field">
+        <span class="label" id="fmtLabel">Format</span>
+        <div class="seg c4" role="group" aria-labelledby="fmtLabel" id="fmtSeg">
+          <button type="button" data-v="reel" aria-pressed="false">Reel</button>
+          <button type="button" data-v="carousel" aria-pressed="true">Carousel</button>
+          <button type="button" data-v="single" aria-pressed="false">Single post</button>
+          <button type="button" data-v="quote" aria-pressed="false">Quotes</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="label" id="platLabel">Platform</span>
+        <div class="seg c3" role="group" aria-labelledby="platLabel" id="platSeg">
+          <button type="button" data-v="instagram" aria-pressed="true">Instagram</button>
+          <button type="button" data-v="linkedin" aria-pressed="false">LinkedIn</button>
+          <button type="button" data-v="both" aria-pressed="false">Both</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="topic">Topic or raw thought</label>
+        <textarea id="topic" placeholder="e.g. Nobody prepares you for who you become after the baby arrives"></textarea>
+        <div class="chips" id="starters"></div>
+      </div>
+
+      <div class="field">
+        <span class="label" id="subLabel">Subtopic (optional, choose any)</span>
+        <div class="subs" role="group" aria-labelledby="subLabel" id="subs"></div>
+      </div>
+
+      <div class="field">
+        <label for="moment">A real moment (optional)</label>
+        <textarea id="moment" placeholder="e.g. Crying in the car park before my first day back, then walking in and chairing a 9am meeting"></textarea>
+      </div>
+
+      <div class="field">
+        <label for="audience">Speaking to</label>
+        <select id="audience">
+          <option value="her">Her (default)</option>
+          <option value="leaders">Workplaces &amp; leaders</option>
+          <option value="both">Her, then the system</option>
+        </select>
+      </div>
+
+      <div class="field" id="quoteField" hidden>
+        <label for="quoteCount">Quote cards</label>
+        <select id="quoteCount"><option>5</option><option selected>8</option><option>10</option></select>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" id="generate" type="button">Generate</button>
+        <button class="btn ghost" id="stop" type="button" hidden>Stop</button>
+      </div>
+      <div class="status" id="status" role="status" aria-live="polite"></div>
+    </aside>
+
+    <main class="out" id="out" aria-live="polite"></main>
+  </div>
+
+  <!-- LIBRARY -->
+  <section class="lib" id="viewLib" hidden>
+    <details class="import" id="importBox">
+      <summary>Add past posts so they count too</summary>
+      <div class="importgrid">
+        <p class="hint">Paste posts you've already published. Separate several posts with a line containing only <strong>---</strong>. The studio will never repeat their hooks, lines or captions.</p>
+        <div class="field"><label for="impText">Post text</label><textarea id="impText" rows="7" placeholder="Paste one or more past posts here"></textarea></div>
+        <div class="row3">
+          <div class="field"><label for="impPlat">Platform</label><select id="impPlat"><option value="linkedin">LinkedIn</option><option value="instagram">Instagram</option><option value="substack">Substack</option></select></div>
+          <div class="field"><label for="impFmt">Format</label><select id="impFmt"><option value="single">Single post</option><option value="carousel">Carousel</option><option value="reel">Reel</option><option value="quote">Quote</option></select></div>
+          <div class="field"><label for="impSub">Subtopic</label><select id="impSub"><option value="">None</option><option value="matrescence">Matrescence</option><option value="quotes">Quotes</option><option value="tip">The Invisible Postpartum</option><option value="tmr">The Motherhood Rework</option></select></div>
+        </div>
+        <div class="actions"><button class="btn primary" id="impGo" type="button">Add to library</button><span class="status" id="impStatus"></span></div>
+      </div>
+    </details>
+
+    <div class="libbar">
+      <div class="field grow"><label for="libSearch">Search</label><input type="search" id="libSearch" placeholder="Search hooks, captions, quotes"></div>
+      <div class="field"><label for="libFmt">Format</label><select id="libFmt"><option value="">All</option><option value="reel">Reel</option><option value="carousel">Carousel</option><option value="single">Single post</option><option value="quote">Quotes</option></select></div>
+      <div class="field"><label for="libSub">Subtopic</label><select id="libSub"><option value="">All</option><option value="matrescence">Matrescence</option><option value="quotes">Quotes</option><option value="tip">The Invisible Postpartum</option><option value="tmr">The Motherhood Rework</option><option value="-">None</option></select></div>
+      <div class="field"><label for="libStatus">Status</label><select id="libStatus"><option value="">All</option><option value="draft">Draft</option><option value="posted">Posted</option></select></div>
+    </div>
+    <div class="liblist" id="libList"></div>
+  </section>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+const FMT_NAME = {reel:"Reel", carousel:"Carousel", single:"Single post", quote:"Quotes"};
+const PLAT_NAME = {instagram:"Instagram", linkedin:"LinkedIn", substack:"Substack"};
+
+/* ---------- Voice ---------- */
+const VOICE = `Write as Sara Pantry. 41, from Worthing on England's south coast, ten years in London, a decade in Singapore. Type A, did all the right things (career, master's, marriage, a son, Luca), then crash landed into motherhood and felt like a stranger in her own body. Found matrescence and retrained as a practitioner. Ikigai mentor for years. Senior workplace leader at LinkedIn by day. Built Return Ready (pairs mums returning from leave with mums who've been there), all under The Motherhood Rework. Has a "woo-woo" side: intuition, human design, astrology, rituals, the divine feminine, spoken about as someone curious and learning, never as an authority, and only when it genuinely adds something. Turned 41 and is waking up: wants to break the rules she's lived by and live on her own terms.
+
+WHO SHE WRITES FOR: the woman who ticked everything off the list and is quietly asking "Is this it?". 35 to 45, expat, senior role, probably raised her kids without her village, the millennial who loved a rave and dance music. Lives in her contradictions (early nights and the rave, adores her kids and wants the work trip). She doesn't need fixing. By default write TO her, one woman at a time, and don't lead with motherhood unless the subtopic is about it.
+
+VOICE: Warm. Honest. Alive. Like a voice note to her best friend. Real, specific details (the restaurant, the 3am flight, the school gate), never vague. Felt, physical images ("let your shoulders drop", "like putting on shoes you forgot fit"). Proper British English and spelling, the odd British phrase where natural. Repeats for emphasis ("so, so"). Holds two things at once without rushing to the silver lining. Long sentence, then a short one on its own line. Turns it back to her with a question. A few exclamation marks only when genuinely meant.
+
+STRUCTURE: Moment → Invisible shift → Universal truth → Reflection.
+- Moment: a specific lived scene with concrete detail, never a summary of a feeling.
+- Invisible shift: the small internal change it reveals. Personal.
+- Universal truth: the collective or systemic truth. A SEPARATE beat from the shift.
+- Reflection: close on a reflective question that continues the thought. Never a marketing CTA (no "comment below", "DM me", "link in bio", "tag a friend", "save this").
+
+NEVER:
+- NO EM DASHES OR EN DASHES AT ALL. Use full stops, commas or line breaks instead.
+- No corporate language (leverage, unlock, journey, game-changer, synergy, navigate the landscape, empower).
+- No hustle, grind, crush it, girl boss, supermum, have it all, find balance.
+- No Instagram-spiritual clichés ("manifest your dream life", "lean into your feminine energy", "step into your highest self").
+- No "you've got this mama". No toxic positivity. No advice without a story under it.
+- No branded hashtags (#frommetowe #workingmamareset #returnready #doingitdifferently #makingtheinvisiblevisible #invisiblepostpartum #motherhoodrework). Topic-only hashtags.
+- Never invent named people, quotes from real people, statistics, or new facts about Sara's family. Nothing any coach could have written.
+TEST: would she read this and think "How did she know?"`;
+
+/* ---------- Source material (distilled from Sara's own documents) ---------- */
+const PROOF_BANK = `PROOF BANK (from The Motherhood Rework guide). Use a figure ONLY from this list, and name its source in the copy. Never invent or round up a statistic.
+- Pregnancy produces consistent grey-matter reductions in regions for social cognition; researchers could identify every woman as having been pregnant from her brain alone; changes lasted at least two years (Hoekzema et al., Nature Neuroscience, 2017). A small follow-up suggests they appear to persist at six years (Martínez-García et al., 2021; say "appears to persist").
+- Matrescence was coined by anthropologist Dana Raphael in the 1970s and revived as a researched developmental transition, comparable to adolescence, by Aurélie Athan at Teachers College, Columbia.
+- UK: the hourly pay gap widens for about twelve years after the first child, reaching roughly a third (Institute for Fiscal Studies).
+- Denmark: after a first child, mothers' earnings drop and do not recover while fathers' are largely unaffected, a long-run gap around 20% (Kleven, Landais & Søgaard, 2019). The pattern holds across 130+ countries (Kleven et al., Child Penalty Atlas, 2024).
+- UK: when the first child arrives, graduate mothers' employment falls about 16 points while men's barely moves (IFS).
+- 43% of women leave full-time STEM work after their first child vs about 23% of men (Cech & Blair-Loy, PNAS, 2019, US).
+- 93% of highly qualified women who off-ramp want to return (Hewlett & Luce, HBR, 2005, US, dated).
+- Replacing an employee costs roughly 50–200% of salary, senior roles at the top of that range (Gallup; SHRM).
+One-liners: "For most women the pay gap doesn't open when she's hired. It opens when she has a baby." "They didn't lose interest. They lost a workplace that made staying possible."`;
+
+const SUBTOPICS = {
+  matrescence: {name:"Matrescence", desc:"The identity shift into motherhood",
+    ctx:`SUBTOPIC: MATRESCENCE.
+- What it is: the developmental identity shift of becoming a mother, as real and significant as adolescence. Real neurological and hormonal reorganisation; the maternal brain measurably changes. It begins early, often before birth, sometimes in the hoping. It keeps unfolding for years, not just the first year.
+- What it gives her: language, then relief, then permission to stop operating as if nothing has changed. The shift moves from "what is wrong with me?" to "what is happening to me?".
+- How to talk about it (Sara's signature): name it simply, ground it in the adolescence analogy, then land one real fact. Avoid both traps: too clinical (a neuroscience lecture) or too vague (just a feeling). Example of the move: "A teenager gets space and patience. You got a return date."
+- It is the credible front door for a sceptical, evidence-led woman. Lead here before anything intuitive.
+- Sara's story: crash landed into motherhood, felt like a stranger in her own body, a panic attack a year in when "on paper, life was perfect", found the word and retrained as a practitioner.
+- Rich territory: ambition changing shape, friendships, marriage, clothes that no longer feel like her, forgetfulness and losing words mid-presentation, decision-making, values, guilt, the first work trip, identity at networking events, birthdays, second matrescence at perimenopause, what her children see.`},
+  quotes: {name:"Quotes", desc:"Built around one line worth quoting",
+    ctx:`SUBTOPIC: QUOTES. Build the piece around ONE original line that says the true thing about her that she cannot or does not want to say about herself, so she can be the one to share it. Apply the QUOTE METHOD below to that line, make it the hook or the centrepiece, and let everything else earn it. Never quote anyone else.`},
+  tip: {name:"The Invisible Postpartum", desc:"Loss, the body healing, interrupted identity",
+    ctx:`SUBTOPIC: THE INVISIBLE POSTPARTUM™ (Sara's book, subtitle "Making the invisible visible after pregnancy loss"; the name is trademarked, write it as a name, never a hashtag).
+SARA'S STORY (she shares it publicly): two miscarriages. The second, last year at 14 weeks, ended in a termination for Trisomy 18 and other complications. Even as a certified matrescence coach who understood postpartum and identity shifts, she felt completely lost, didn't know what was happening in her body or what to ask for, and was expected to return to normal far too quickly. On the outside: back at work, showing up, replying to emails. Inside: the ground had shifted. The baby was Arlo; the book is dedicated to him ("You changed the shape of me forever"). Only name Arlo if Sara's brief or moment does.
+CORE IDEA: there is a postpartum period after pregnancy loss. We just don't call it that. It is not one thing. It is three strands happening at once, inside a woman the world expects to bounce back:
+1. THE BODY. The body commits from the first days (progesterone rising and calming the nervous system, oestrogen supporting serotonin, blood volume increasing, the brain already changing in attachment and vigilance regions). When the pregnancy ends the hormones don't taper, they crash. Wired and exhausted at once, fog that feels like being underwater, reaching for a word and finding nothing, swinging from numb to tearful. "This is not weakness. It is physiology."
+2. THE GRIEF. It lives in the nervous system, not just the mind. You can cry in the morning and lead a meeting at ten, and that doesn't mean you're over it. Often no funeral, no ceremony, no witness. The "at least" comments ("at least it was early", "at least you can try again"). Grieving a timeline, a due date that will pass unmarked, the announcement never made, the name imagined.
+3. THE IDENTITY. Matrescence had already begun: thinking in "we" instead of "me", the second drink waved away, a future rearranged. When a pregnancy ends you lose who you were becoming too. The in-between: not who you were, not who you were moving toward. Often surfaces later, once the bleeding stops and life resumes. For women who are already mothers it is still real.
+OTHER IDEAS FROM THE BOOK: grief makes you contract, and contraction is protection, not failure ("the tank is not low, the tank is empty"). Naming it shifts the question from "what is wrong with me?" to "what is happening to me?". "I'm fine" is the only sentence that comes out because it doesn't reduce to a sentence. There is no schedule for this; good days are not the finish line; anniversaries and the due date can bring it back. Ritual gives grief a place to land, and the ancient world already knew this. Words for work: "I'm in postpartum recovery after pregnancy loss and I need some short-term adjustments and flexibility." Workplace policies with no provision for loss are a gap in the system, not in her entitlement. Partners carry it too. Still Becoming: hope and grief don't take turns; wanting to try again is not betrayal; not trying again is not settling; "You are still becoming. Not into who you would have been, but into whoever you are being made into by the fact that it did happen." Sara writes poetry as she processes (collected in The Unspoken Motherhood on Substack).
+REGISTER: Tender. Hold without fixing. No silver linings, no "everything happens for a reason", no graphic medical detail, never a hook used for engagement. Say why Sara is sharing (silence should not be the price of survival), never for sympathy. Do not add facts beyond these. Don't quote long passages of the book; write fresh lines.`},
+  tmr: {name:"The Motherhood Rework", desc:"Her at the centre: see it, understand it, choose it",
+    ctx:`SUBTOPIC: THE MOTHERHOOD REWORK (brand voice and content territory).
+- North star: make the invisible visible, so she can see it, understand it, and choose. The three movements: SEE IT (name it, she feels witnessed) → UNDERSTAND IT (the why under the surface, where a fact earns its place) → CHOOSE IT (small doable ways to do it differently, on her terms). Never skip straight to Choose. Action without acknowledgment is just another should.
+- WHO IS AT THE CENTRE: the woman reading. Use "you" and the community "us" (the women, her included). Never an operator "we" (Sara and team) addressing her. Keep Sara's lived specifics but move the camera onto her, e.g. "You might sit in the car park on your first day back and cry before you've even walked in. That is not a sign you are not ready. It is the sign of a woman walking back in as someone new, into a building that expects the old her."
+- She is not burned out, she is misaligned. In-between: not who she was, not yet sure who she is becoming. Three shapes: the high achiever who lost her edge; the "it should be fine" woman; the one circling a decision she can't make (trying to make a new-her decision with an old-her framework).
+- Six notes in one voice: Tender, Grounded, Sharp, Funny, Intuitive, Evidence. Lead with one, let others colour it. Signature move: warmth plus a sharp edge plus a real fact. Signature blends: the soft truth with a sharp edge; the intuitive grounded in data; the funny that turns ("You can run a P&L across three time zones and you have still googled 'is this normal' four times before 9am").
+- The three yeses: "that's me" (recognition through a lived detail), "that makes sense" (clarity, often a fact), "I hadn't seen it that way" (reframe). Also aim for hope: "maybe this gets to feel different."
+- Frameworks in order: Matrescence names it (the public front door) → Human Design maps her wiring (post-trust only, never open cold with it, frame as a practical map not a belief) → Ikigai points to direction (not a vision board; where what you love, what you're brilliant at, what feels meaningful now and what the world needs actually meet).
+- Content territories: Awareness (why do I feel like this?), Identity (who am I becoming?), Rework (what do I do now? prompts, scripts, small experiments), Possibility (joy, freedom, travel, rediscovering yourself), Workplace Change (one woman first, then the system).
+- Build around experiences, not messages: daycare drop-off, work trips, promotions, breastfeeding, clothing, forgetfulness, performance reviews, friendships, marriage, returning to exercise, networking events, the first presentation back, holiday guilt, travelling without children, saying no, financial decisions, birthdays.
+- Signature language to use: Making the Invisible Visible; Becoming, Not Bouncing Back; The Return Is Bigger Than the Job; A Return Date Isn't a Return Plan; Identity Before Strategy; the in-between; be where your feet are. Anchors: "Nothing is wrong with you. You are moving through something layered, most of it invisible to the people watching you function." "Something has changed, and you are trying to operate like it hasn't."
+- Promise not-aloneness ("so many women know this") freely. Promise a room of women only where one exists (Return Ready, the circles). Always "mothers", never "parents". Never "bounce back".
+- End with hope.`}
+};
+
+const CAROUSEL_BRAIN = `CAROUSEL GENERATION ENGINE (this governs the carousel and OVERRIDES the general structure, punctuation and closing rules above).
+STRICT 6-SLIDE SEQUENCE:
+1. The Honest Hook: a bold, scroll-stopping truth that challenges the status quo. Punchy, under 10 words.
+2. The Lived Moment: anchor the hook in a hyper-specific, corporate-lived detail. Tactile moments, e.g. crying in the car park before badging in, a presentation delivered while forgetting simple words, standing in front of a wardrobe where nothing feels like her. Never invent named people.
+3. The Naming: introduce "Matrescence" to explain the developmental identity shift. Reframe the struggle as a structural milestone, not a personal failure.
+4. The Wide Pattern: zoom out from her to a hard, collective pattern or workplace critique. Bring structural data from the PROOF BANK only (e.g. the motherhood pay penalty opening after childbirth, retention and return-policy failures), with the source named. Never invent a figure.
+5. The Actionable Rework: a small, doable invitation, journaling prompt or boundary tool. She chooses differently on her own terms, rejecting the "shoulds".
+6. Hope & Community: end with optimistic solidarity ("So many of us are walking the same road"). Close on an open-ended community question that invites an authentic comment. (Here a community question IS wanted; no "comment below" or "DM me" wording.)
+FORMATTING: every slide is short sentences that each stand alone on their own line (use \\n between lines). No paragraphs.
+PUNCTUATION FOR THIS CAROUSEL: use spaced em dashes ( — ) to hold ideas in tension, where they genuinely help. A maximum of ONE exclamation mark across the entire carousel, captions included. Curly quotes.
+VOCABULARY BANS: never "bounce back", "you've got this", "find balance", "supermum", "girl boss", "hustle", "grind", "empower". Always "mothers", never "parents".
+THE "WE" RULE: "we" and "us" only ever mean the community of mothers ("so many of us live this"), never the operator, Sara's team or anyone observing her.
+VOICE: The Motherhood Rework guardrails. The woman reading is at the centre ("you"). Recognition first, then clarity, then the reframe. Specific, not generic.
+CAPTIONS for this carousel follow the same punctuation, vocabulary and "we" rules.`;
+
+const QUOTE_METHOD = `QUOTE METHOD (from Sara's Quote Course Workbook).
+Core law: a quote travels when it says the true thing about her that she cannot or does not want to say about herself, and lets her be the one to post it. Sharing is self-disclosure with an alibi. A quote is about her, never advice about you.
+THE EIGHT STRUCTURES (the unsayable sentence each one says for her):
+1. Era Label: "I am done being available to that." Name a season she's already in, with the label as a thought she's had, in quotation marks, a little edge or humour. Shapes: In my "___" era. / I finally hit my "___" era. Fails if the label is an adjective ("growth era").
+2. Maturity Ledger (reliable, can go very large): "I have outgrown things I used to want." Lead with the trade. Shape: The older I get, the less I want ___. I just want ___. Both things must be wants she'd admit to; make it concrete and bodily ("feel light").
+3. Answered Prayer: "My life is good and I earned it, and it's heavy." Shapes: What a privilege it is to ___. / You prayed for ___, now ___. Only for good problems, never grief or injustice.
+4. Redefinition: "I'm doing better than you think." Shape: My ___ life? ___. ___. ___. Asked as a question, concrete answers, one interior item near the end.
+5. Permission Slip: "Somebody should be kinder to me." Name the specific struggle first, then small, time-bound comfort ("a little extra right now"). Judge on sends.
+6. Anaphora Engine: repeated 2–4 word stem, escalating beats, then a break and a verdict that answers the accusation ("That's not delusion. That's devotion."). No verdict, no quote.
+7. Honouring Invisible Work (highest breakout): "I work harder than anyone can see." Third person, three concrete tasks then an emotional one last, ending on who it's for. Dignity, never martyrdom.
+8. Reframe (highest ceiling): "This is not my fault." Hand her a different cause for something she blames herself for, so it CLEARS her, never catches her. Shape: Maybe it's not "___". Maybe it's ___. Relocate blame to something checkable ("without the village, inside a 2026 work week").
+CRAFT. Keep the alibi intact: hedge big claims (really, just, maybe, a little, lately); choose the person on purpose (third for anything that might sting, first for confessions, second for comfort only, dialogue for memories); future tense invites, present tense accuses; put labels the world uses about her in quotation marks; launder every flex through gratitude, a trade, invisible work or an era. Make it land: concrete nouns (birthdays, lunches, the village, twelve minutes, the car) over abstract ones (responsibilities, alignment, journey); small physical verbs (remember, pack, soften, hold, cry) never brand verbs (unlock, elevate, transform, manifest); long setup, short payoff, as separate sentences; put the turn in the last few words.
+NEVER in a quote: "read that again", rhetorical questions, intensity adverbs, advice, explaining it inside itself ("and that's okay"), teaser lines like "a reminder for the heavy days".
+THE SIX GATES (every quote must pass): 1 a moment, not a topic; 2 she gets something to claim about herself; 3 at least one real, concrete detail; 4 shareable without having to defend it; 5 one breath, about 40 words or fewer; 6 reads like a private note.`;
+
+const AUD = {
+  her: "AUDIENCE: Her, the woman described above. Warm, personal, 'I see you'.",
+  leaders: "AUDIENCE: Workplaces and leaders. Stay in Sara's voice but go bolder: challenge the system, don't let them off the hook. Still grounded in a lived moment.",
+  both: "AUDIENCE: Open personal, speaking to her, then zoom out to challenge workplaces and systems within the same piece."
+};
+
+const PLAT_RULES = {
+  instagram: (f) => `"instagram": {"caption": "${f === "single" ? "Instagram caption, 100–200 words" : "Instagram caption, 60–150 words"}, short lines, line breaks as \\n, hook in the first line, ends on a reflective question", "hashtags": ["6–8 topic-only hashtags"]}`,
+  linkedin: (f) => `"linkedin": {"caption": "${f === "single" ? "LinkedIn text post, 220–350 words: a one-line hook that stops the scroll, generous white space, the full four-beat formula, one light credibility line woven in late, ends on a reflective question" : "LinkedIn post text to go with it, 150–280 words, generous line breaks, its own hook line (different from the Instagram caption's first line), ends on a reflective question"}", "hashtags": ["3 topic-only hashtags"]}`
+};
+
+function shapeFor(format, plats, n, qn){
+  let core = "";
+  if (format === "reel") core = `TASK: One short-form REEL (list-style, 20–40 seconds) that deeply connects with her, plus clear instructions for Sara's VA.
+"title": "3–6 word working title",
+"hook": "on-screen hook for the first 2 seconds, max 12 words",
+"onScreen": ["5–7 short on-screen text lines in order, each max 12 words, moving through moment, shift, truth"],
+"closingLine": "final on-screen line: the reflection question or the line that lands",
+"va": {"visual": "footage or b-roll to use; Canva aesthetic clean, modern, neutral, soft", "audio": "music mood or trending-sound guidance", "pacing": "seconds per line and timing notes"},`;
+  if (format === "carousel") core = `TASK: One CAROUSEL following the CAROUSEL GENERATION ENGINE exactly: six slides, in this order, each with the role named below. It works as an Instagram carousel and a LinkedIn document post.
+"title": "3–6 word working title",
+"slides": [
+  {"role": "The Honest Hook", "headline": "under 10 words, a bold scroll-stopping truth that challenges the status quo", "body": ""},
+  {"role": "The Lived Moment", "headline": "the moment in a few words", "body": "2–4 short sentences, each on its own line (\\n between them): one hyper-specific, tactile corporate-lived detail"},
+  {"role": "The Naming", "headline": "names matrescence", "body": "2–4 short lines: the developmental identity shift, as real as adolescence; a structural milestone, not a personal failure"},
+  {"role": "The Wide Pattern", "headline": "the collective pattern or workplace critique", "body": "2–4 short lines with ONE figure from the PROOF BANK, its source named in brackets"},
+  {"role": "The Actionable Rework", "headline": "a small, doable invitation", "body": "2–4 short lines: a journaling prompt, boundary tool or tiny experiment she chooses on her own terms, no shoulds"},
+  {"role": "Hope & Community", "headline": "optimistic solidarity", "body": "1–3 short lines ending on ONE open-ended community question that invites a real comment"}
+],`;
+  if (format === "single") core = `TASK: One SINGLE POST. For Instagram it is one image plus a caption; for LinkedIn it is a text post (the image line can sit at the top as the hook or go on an optional image).
+"title": "3–6 word working title",
+"imageText": "the words for the single image, max 18 words: the moment or the truth, not a slogan",`;
+  if (format === "quote") core = `TASK: A set of ${qn} standalone QUOTE CARDS around ONE feeling, following the QUOTE METHOD exactly. Every card is a complete quote that could be screenshotted alone: no setup cards, no teasers, no build across cards. Use at least four different structures, leaning on Invisible Work, Reframe and Maturity Ledger. Original lines only, never quoting anyone. Run each through the six gates and ORDER THEM BEST FIRST: the two strongest go in positions 1 and 2. Use "\\n" where a line break should control the pause (give the turn its own line).
+"title": "3–6 word working title naming the feeling",
+"quotes": [{"text": "the quote, no surrounding quotation marks", "structure": "one of: Era Label, Maturity Ledger, Answered Prayer, Redefinition, Permission Slip, Anaphora Engine, Invisible Work, Reframe", "says": "the unsayable sentence it says for her, in her first person, max 14 words"}],
+(The captions below go with the set: they should not repeat any quote.)`;
+  return `${core}\n${plats.map(p => PLAT_RULES[p](format)).join(",\n")}`;
+}
+
+/* ---------- Checks ---------- */
+const BANNED = ["hustle","grind","crush it","killing it","girl boss","girlboss","have it all","find balance","supermum","you've got this","step into your highest self","lean into your feminine energy","manifest your dream life","comment below","dm me","link in bio","tag a friend","leverage","unlock","game-changer","game changer","synergy","navigate the landscape","journey"];
+const BANNED_TAGS = ["#frommetowe","#workingmamareset","#returnready","#doingitdifferently","#makingtheinvisiblevisible","#invisiblepostpartum","#motherhoodrework","#shethrives"];
+
+function polish(s, keepDash){
+  if (typeof s !== "string") return "";
+  if (keepDash) s = s.replace(/\s*[—–]\s*|\s+--\s+/g, " — ");
+  return s
+    .replace(/\s*[—–]\s*/g, keepDash ? " — " : ", ").replace(/\s+--\s+/g, ", ")
+    .replace(/,\s*,/g, ",").replace(/,\s*([.?!])/g, "$1")
+    .replace(/\.\.\./g, "…")
+    .replace(/(^|[\s(\[\n])"/g, "$1“").replace(/"/g, "”")
+    .replace(/(^|[\s(\[\n])'/g, "$1‘").replace(/'/g, "’")
+    .trim();
+}
+function cleanTags(tags){
+  return (Array.isArray(tags) ? tags : []).map(t => String(t).trim()).filter(Boolean)
+    .map(t => "#" + t.replace(/^#+/, "").replace(/\s+/g, ""))
+    .filter(t => !BANNED_TAGS.includes(t.toLowerCase()));
+}
+function voiceCheck(text, format){
+  const car = format === "carousel";
+  const low = text.toLowerCase().replace(/’/g, "'");
+  const list = car ? BANNED.concat(["bounce back","bouncing back","empower","empowered","empowering","parents"]) : BANNED;
+  const hits = list.filter(b => new RegExp("\\b" + b.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b").test(low));
+  if (!car && /[—–]/.test(text)) hits.push("em dash");
+  const bangs = (text.match(/!/g) || []).length;
+  if (bangs > (car ? 1 : 3)) hits.push(bangs + " exclamation marks");
+  if (car){ const n = (current.data.slides || []).length; if (n !== 6) hits.push(n + " slides, not 6"); const h = (current.data.slides || [])[0]; if (h && words(h.headline).length >= 10) hits.push("hook is 10+ words"); }
+  return hits;
+}
+
+/* ---------- Repetition engine ---------- */
+const words = s => (s || "").toLowerCase().replace(/[‘’']/g, "").replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter(Boolean);
+function shingles(s, k){ const w = words(s), out = new Set(); for (let i = 0; i + k <= w.length; i++) out.add(w.slice(i, i + k).join(" ")); return out; }
+function sentences(s){ return (s || "").split(/[.?!\n]+/).map(x => words(x).join(" ")).filter(x => x.split(" ").length >= 6); }
+function headWords(s){ return words(s).slice(0, 12).join(" "); }
+
+function itemIndex(it){
+  if (!it._idx){
+    const text = it.allText || "";
+    it._idx = { sh: shingles(text, 4), sent: new Set(sentences(text)), hooks: (it.hooks || []).map(headWords).filter(Boolean) };
+  }
+  return it._idx;
+}
+// Compare a candidate's units (hook, lines, captions) against the library.
+function findRepeats(units, excludeId){
+  const found = [];
+  for (const it of library){
+    if (it.id === excludeId) continue;
+    const idx = itemIndex(it);
+    let reasons = [];
+    for (const u of units){
+      if (!u.text) continue;
+      const sh = shingles(u.text, 4);
+      if (sh.size >= 3){
+        let hit = 0; sh.forEach(x => { if (idx.sh.has(x)) hit++; });
+        const share = hit / sh.size;
+        if ((u.kind === "caption" && share > 0.22) || (u.kind !== "caption" && share >= 0.5)) reasons.push({unit: u, why: Math.round(share * 100) + "% of the wording matches"});
+      }
+      for (const s of sentences(u.text)) if (idx.sent.has(s)) { reasons.push({unit: u, why: "repeats the line “" + s + "”"}); break; }
+      if (u.kind === "hook"){ const h = headWords(u.text); if (h && idx.hooks.some(x => x === h || jacc(x, h) > 0.7)) reasons.push({unit: u, why: "hook is almost the same"}); }
+    }
+    if (reasons.length) found.push({item: it, reasons});
+  }
+  return found;
+}
+function jacc(a, b){ const A = new Set(a.split(" ")), B = new Set(b.split(" ")); let i = 0; A.forEach(x => { if (B.has(x)) i++; }); return i / (A.size + B.size - i || 1); }
+
+function unitsOf(format, d){
+  const u = [];
+  if (d.hook) u.push({kind:"hook", label:"hook", text:d.hook});
+  if (d.imageText) u.push({kind:"hook", label:"image line", text:d.imageText});
+  (d.onScreen || []).forEach(t => u.push({kind:"line", label:"on-screen line", text:t}));
+  if (d.closingLine) u.push({kind:"line", label:"closing line", text:d.closingLine});
+  (d.slides || []).forEach((s, i) => { u.push({kind: i === 0 ? "hook" : "line", label:"slide " + (i+1), text:s.headline}); if (s.body) u.push({kind:"line", label:"slide " + (i+1) + " body", text:s.body}); });
+  (d.quotes || []).forEach(q => u.push({kind:"hook", label:"quote", text:q.text}));
+  ["instagram","linkedin"].forEach(p => { if (d[p] && d[p].caption){ u.push({kind:"caption", label: PLAT_NAME[p] + " caption", text:d[p].caption}); const first = d[p].caption.split("\n").find(x => x.trim()); if (first) u.push({kind:"hook", label: PLAT_NAME[p] + " opening line", text:first}); } });
+  return u;
+}
+function allTextOf(d){ return unitsOf(null, d).map(u => u.text).join("\n"); }
+function hooksOf(d){ return unitsOf(null, d).filter(u => u.kind === "hook").map(u => u.text); }
+
+// Compact list of what's been used, for the prompt. Same subtopic first, then most recent.
+const subsOf = it => Array.isArray(it.subtopics) ? it.subtopics : (it.subtopic ? [it.subtopic] : []);
+function usedList(subs, excludeId){
+  const items = library.filter(it => it.id !== excludeId);
+  const rel = it => subsOf(it).some(s => subs.includes(s)) ? 1 : 0;
+  items.sort((a, b) => (rel(b) - rel(a)) || (b.createdAt || "").localeCompare(a.createdAt || ""));
+  let out = "", n = 0;
+  for (const it of items){
+    const line = "- " + [it.title, ...(it.hooks || []).slice(0, 3)].filter(Boolean).join(" | ").slice(0, 300) + "\n";
+    if (out.length + line.length > 24000 || n >= 180) break;
+    out += line; n++;
+  }
+  return {text: out, n};
+}
+
+/* ---------- Example (shown before anything is generated) ---------- */
+const EXAMPLE = {
+  example: true, format: "carousel", platforms: ["instagram"], subtopics: ["matrescence"], topic: "Returning to work is an identity shift",
+  data: {
+    title: "You walked back in someone new",
+    slides: [
+      {role: "The Honest Hook", headline: "You didn’t lose your edge.\nYou changed.", body: ""},
+      {role: "The Lived Moment", headline: "The car park. 8:52am.", body: "Engine off. Lanyard in your lap.\nYou cry for four minutes — then badge in and chair the nine o’clock.\nNobody in that room knows."},
+      {role: "The Naming", headline: "There is a word for this.\nMatrescence.", body: "The identity shift of becoming a mother.\nAs real as adolescence.\nA developmental milestone — not a failure to cope."},
+      {role: "The Wide Pattern", headline: "The gap doesn’t open when she’s hired.", body: "It opens when she has a baby.\nIn the UK, mothers’ hourly pay gap widens for twelve years after a first child — to roughly a third (Institute for Fiscal Studies).\nThat’s not a confidence problem. That’s a system."},
+      {role: "The Actionable Rework", headline: "Try this tonight.", body: "Finish one line: “The old me would have…”\nThen another: “The woman I am now chooses…”\nNo shoulds. Just notice what’s true."},
+      {role: "Hope & Community", headline: "So many of us are walking this same road.", body: "You’re not behind. You’re becoming.\nWhat changed in you that nobody at work can see?"}
+    ],
+    instagram: {
+      caption: "You might sit in the car park on your first day back and cry before you’ve even walked in.\n\nThat isn’t a sign you’re not ready.\nIt’s the sign of a woman walking back in as someone new — into a building that expects the old her.\n\nThere’s a word for it. Matrescence.\n\nSo many of us know that exact drive.\n\nWhat changed in you that nobody at work can see?",
+      hashtags: ["#matrescence","#workingmothers","#returntowork","#maternityleave","#identityshift","#expatmums"]
+    }
+  }
+};
+
+/* ---------- State ---------- */
+let fmt = "carousel", plat = "instagram", subs = [];
+let current = EXAMPLE;      // {format, platforms, subtopics, topic, moment, audience, data, id?, example?}
+let library = [];           // [{id, ...doc}]
+let ctl = null, db = null, libRef = null, dbState = "loading";
+const samplePromise = (window.claude && window.claude.use) ? window.claude.use("sample") : Promise.resolve(null);
+const dbPromise = (window.claude && window.claude.use) ? window.claude.use("db") : Promise.resolve(null);
+
+/* ---------- Helpers ---------- */
+let toastT;
+function toast(msg){ const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 2200); }
+async function copy(text, label){
+  try { await navigator.clipboard.writeText(text); toast((label || "Text") + " copied"); }
+  catch(e){
+    const ta = el("textarea"); ta.value = text; ta.setAttribute("readonly",""); ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); toast((label || "Text") + " copied"); } catch(_) { toast("Select the text and copy it manually"); }
+    ta.remove();
+  }
+}
+function copyBtn(getText, label){ const b = el("button", "btn ghost small", "Copy"); b.type = "button"; b.addEventListener("click", () => copy(typeof getText === "function" ? getText() : getText, label)); return b; }
+function block(title, getText, label){
+  const b = el("section", "block fade");
+  const h = el("div", "blockhead"); h.append(el("span", "label", title));
+  if (getText) h.append(copyBtn(getText, label || title));
+  b.append(h); return b;
+}
+function platTag(p){ return el("span", "tag " + (p === "linkedin" ? "li" : p === "instagram" ? "ig" : "plain"), PLAT_NAME[p] || p); }
+function segWire(id, onPick){
+  document.querySelectorAll("#" + id + " button").forEach(b => b.addEventListener("click", () => {
+    document.querySelectorAll("#" + id + " button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    onPick(b.dataset.v);
+  }));
+}
+
+/* ---------- Read inline edits back into data ---------- */
+function syncEdits(){
+  if (current.example) return;
+  const d = current.data;
+  document.querySelectorAll("[data-path]").forEach(n => {
+    const path = n.dataset.path.split("."); let o = d;
+    for (let i = 0; i < path.length - 1; i++) { o = o[path[i]]; if (!o) return; }
+    o[path[path.length - 1]] = n.innerText.trim();
+  });
+}
+function editable(node, path){ node.contentEditable = "true"; node.dataset.path = path; node.addEventListener("blur", onEditBlur); return node; }
+let editT;
+function onEditBlur(){ clearTimeout(editT); editT = setTimeout(persistEdits, 400); }
+async function persistEdits(){
+  if (!current.id || !libRef) return;
+  syncEdits();
+  const d = current.data;
+  try { await libRef.doc(current.id).update({data: d, title: d.title || "", allText: allTextOf(d), hooks: hooksOf(d)}); } catch(e){}
+}
+
+/* ---------- Render output ---------- */
+function render(){
+  const out = $("#out"); out.textContent = "";
+  const d = current.data;
+  const head = el("div", "outhead fade");
+  const left = el("div");
+  const meta = [FMT_NAME[current.format], ...(current.subtopics || []).filter(k => SUBTOPICS[k]).map(k => SUBTOPICS[k].name)];
+  left.append(el("div", "eyebrow", meta.join(" · ")), el("h2", null, d.title || current.topic || "Untitled"));
+  const right = el("div", "actions");
+  current.platforms.forEach(p => right.append(platTag(p)));
+  if (current.example) right.append(el("span", "tag example", "Example. Generate your own"));
+  else {
+    const check = voiceCheck(allTextOf(d), current.format);
+    right.append(check.length ? el("span", "tag warn", "Voice: " + check.join(", ")) : el("span", "tag ok", "Voice check clear"));
+    const reps = current.repeats || [];
+    right.append(reps.length ? el("span", "tag warn", "Close to " + reps.length + " library piece" + (reps.length > 1 ? "s" : "")) : el("span", "tag ok", "Original against " + (library.length - (current.id ? 1 : 0)) + " pieces"));
+  }
+  head.append(left, right); out.append(head);
+
+  if (!current.example && current.repeats && current.repeats.length){
+    const w = block("Overlap with your library"); w.classList.add("plat");
+    const ul = el("ul"); ul.style.margin = "0"; ul.style.paddingLeft = "1.2em";
+    current.repeats.slice(0, 4).forEach(r => ul.append(el("li", null, "“" + (r.item.title || "Untitled") + "”: " + r.reasons.map(x => x.unit.label + " " + x.why).slice(0, 2).join("; "))));
+    w.append(ul, el("p", "hint", "Press “Try another version” for a fresh angle, or edit the lines above."));
+    out.append(w);
+  }
+
+  if (current.format === "reel") renderReel(out, d);
+  if (current.format === "carousel") renderCarousel(out, d);
+  if (current.format === "single") renderSingle(out, d);
+  if (current.format === "quote") renderQuotes(out, d);
+
+  ["instagram","linkedin"].forEach(p => {
+    if (!d[p]) return;
+    const title = current.format === "single" && p === "linkedin" ? "LinkedIn post" : PLAT_NAME[p] + " caption";
+    const b = block(title, () => (d[p].caption || "") + "\n\n" + (d[p].hashtags || []).join(" "), title);
+    b.classList.add("plat", p);
+    const c = editable(el("div", "copytext", d[p].caption || ""), p + ".caption"); c.spellcheck = true;
+    const wc = el("span", "hint", words(d[p].caption).length + " words");
+    b.append(c, el("div", "hashtags", (d[p].hashtags || []).join("  ")), wc);
+    out.append(b);
+  });
+
+  const foot = el("section", "block fade");
+  foot.append(el("span", "label", "Refine this"));
+  const r = el("div", "refine");
+  const inp = el("input"); inp.type = "text"; inp.id = "refineInput"; inp.placeholder = "e.g. more raw in the opening, shorter LinkedIn post, less about motherhood";
+  const go = el("button", "btn ghost", "Rewrite"); go.type = "button";
+  const doRefine = () => { if (inp.value.trim()) run("refine", inp.value.trim()); };
+  go.addEventListener("click", doRefine); inp.addEventListener("keydown", e => { if (e.key === "Enter") doRefine(); });
+  r.append(inp, go);
+  const acts = el("div", "actions");
+  const all = el("button", "btn ghost small", "Copy everything"); all.type = "button"; all.addEventListener("click", () => { syncEdits(); copy(plainText(), "Everything"); });
+  acts.append(all);
+  if (!current.example){
+    const again = el("button", "btn ghost small", "Try another version"); again.type = "button"; again.addEventListener("click", () => run("new"));
+    const posted = el("button", "btn ghost small", current.status === "posted" ? "Posted ✓" : "Mark as posted"); posted.type = "button";
+    posted.addEventListener("click", () => setStatus(current.id, current.status === "posted" ? "draft" : "posted"));
+    acts.append(again, posted);
+    if (current.id) acts.append(el("span", "hint", "Saved to your library"));
+    else if (dbState !== "ready") acts.append(el("span", "hint", "Library unavailable in this view, so this piece isn’t stored"));
+  }
+  foot.append(r, acts);
+  out.append(foot);
+}
+
+function renderReel(out, d){
+  const h = block("Hook · first 2 seconds", () => d.hook, "Hook");
+  h.append(editable(el("div", "hook", d.hook || ""), "hook")); out.append(h);
+  const s = block("On-screen text, in order", () => (d.onScreen || []).join("\n") + "\n" + (d.closingLine || ""), "On-screen text");
+  const ol = el("ol", "beats"); (d.onScreen || []).forEach((t, i) => ol.append(editable(el("li", null, t), "onScreen." + i)));
+  const cl = editable(el("div", "hook", d.closingLine || ""), "closingLine"); cl.style.fontSize = "20px";
+  s.append(ol, cl); out.append(s);
+  const va = d.va || {};
+  const vaText = () => { syncEdits(); return `REEL: ${d.title || ""}\n\nHOOK (0–2s): ${d.hook}\n\nON-SCREEN TEXT:\n${(d.onScreen||[]).map((t,i)=>`${i+1}. ${t}`).join("\n")}\nClose: ${d.closingLine}\n\nVISUAL: ${va.visual||""}\nAUDIO: ${va.audio||""}\nPACING: ${va.pacing||""}` + ["instagram","linkedin"].filter(p => d[p]).map(p => `\n\n${PLAT_NAME[p].toUpperCase()} CAPTION:\n${d[p].caption}\n\n${(d[p].hashtags||[]).join(" ")}`).join(""); };
+  const v = block("Brief for the VA", vaText, "VA brief"); v.classList.add("va");
+  const dl = el("dl"); [["Visual","visual"],["Audio","audio"],["Pacing","pacing"]].forEach(([k, key]) => dl.append(el("dt", null, k), editable(el("dd", null, va[key] || ""), "va." + key)));
+  v.append(dl); out.append(v);
+}
+function renderCarousel(out, d){
+  const slides = d.slides || [];
+  const b = block("Slides · click any text to edit", () => { syncEdits(); return slideText(d); }, "Slides");
+  const grid = el("div", "slides");
+  slides.forEach((s, i) => {
+    const c = el("article", "slide" + (i === 0 ? " first" : ""));
+    const n = el("div", "n"); n.append(el("span", null, (i+1) + " / " + slides.length + (s.role ? " · " + s.role : "")), el("span", null, i === slides.length - 1 ? "" : "→"));
+    const mid = el("div", "mid"); mid.append(editable(el("div", "h", s.headline || ""), "slides." + i + ".headline"));
+    if (s.body) mid.append(editable(el("div", "b", s.body), "slides." + i + ".body"));
+    c.append(n, mid, el("div", "sig", "Sara Pantry"));
+    grid.append(c);
+  });
+  b.append(grid); out.append(b);
+}
+const CAROUSEL_ROLES = ["The Honest Hook","The Lived Moment","The Naming","The Wide Pattern","The Actionable Rework","Hope & Community"];
+const slideText = d => (d.slides || []).map((s, i) => `Slide ${i+1}${s.role ? " · " + s.role : ""}\n${s.headline}${s.body ? "\n" + s.body : ""}`).join("\n\n");
+function renderSingle(out, d){
+  const b = block("Image · click to edit", () => d.imageText, "Image text");
+  const card = el("article", "single"); card.append(editable(el("div", "h", d.imageText || ""), "imageText"), el("div", "sig", "Sara Pantry"));
+  b.append(card); out.append(b);
+}
+const DEFAULT_LAST_CARD = "If this feels like yours, welcome.\nThis is a corner for women who did everything right and are quietly working out what comes next.\nWe do it together, on our own terms.";
+let lastCard = DEFAULT_LAST_CARD, cardRef = null;
+function renderQuotes(out, d){
+  const b = block("Quote cards · strongest first · click to edit", () => { syncEdits(); return quoteText(d); }, "All quotes");
+  b.append(el("p", "hint", "Each card stands alone. Post 1 and 2 first: Instagram tests which one it shows strangers. The last card closes every set."));
+  const grid = el("div", "quotes");
+  (d.quotes || []).forEach((q, i) => {
+    const w = el("div", "qwrap"), card = el("article", "qcard");
+    const t = editable(el("div", "q", q.text || ""), "quotes." + i + ".text");
+    card.append(el("span", "rank", String(i + 1).padStart(2, "0")), t, el("span", "mono", "SP"));
+    const meta = el("div", "qmeta");
+    if (q.structure) meta.append(el("b", null, q.structure));
+    if (q.says) meta.append(el("span", null, "Says for her: “" + q.says + "”"));
+    else if (q.use) meta.append(el("span", null, q.use));
+    const row = el("div", "blockhead"); row.append(meta, copyBtn(() => t.innerText.trim(), "Quote"));
+    w.append(card, row); grid.append(w);
+  });
+  // The fixed last card, shared by every quote set
+  const w = el("div", "qwrap"), card = el("article", "qcard");
+  const t = el("div", "q", lastCard); t.contentEditable = "true"; t.id = "lastCardText";
+  t.addEventListener("blur", saveLastCard);
+  card.append(el("span", "rank", "LAST"), t, el("span", "mono", "SP"));
+  const row = el("div", "blockhead"); row.append(el("div", "qmeta", "The last card. Same on every set. Edit once and it’s kept."), copyBtn(() => t.innerText.trim(), "Last card"));
+  w.append(card, row); grid.append(w);
+  b.append(grid); out.append(b);
+}
+const quoteText = d => (d.quotes || []).map((q, i) => (i + 1) + ". " + q.text).join("\n\n") + "\n\nLAST CARD\n" + lastCard;
+async function saveLastCard(){
+  const v = $("#lastCardText") ? $("#lastCardText").innerText.trim() : "";
+  if (!v || v === lastCard) return;
+  lastCard = v;
+  if (!cardRef) { toast("Last card updated for this visit"); return; }
+  try { await cardRef.set({ text: v, updatedAt: new Date().toISOString() }); toast("Last card saved"); } catch(e){ toast("Couldn’t save the last card"); }
+}
+function plainText(){
+  const d = current.data; let body = "";
+  if (current.format === "reel") body = `HOOK: ${d.hook}\n\n${(d.onScreen||[]).join("\n")}\n${d.closingLine||""}\n\nVA. Visual: ${(d.va||{}).visual||""}\nAudio: ${(d.va||{}).audio||""}\nPacing: ${(d.va||{}).pacing||""}`;
+  if (current.format === "carousel") body = slideText(d);
+  if (current.format === "single") body = `IMAGE: ${d.imageText || ""}`;
+  if (current.format === "quote") body = quoteText(d);
+  const caps = ["instagram","linkedin"].filter(p => d[p]).map(p => `${PLAT_NAME[p].toUpperCase()}\n${d[p].caption}\n\n${(d[p].hashtags||[]).join(" ")}`).join("\n\n");
+  return `${d.title || ""}\n\n${body}\n\n${caps}`.trim();
+}
+
+/* ---------- Normalise model output ---------- */
+function normalise(format, plats, raw){
+  const r = raw && typeof raw === "object" ? raw : {};
+  const P = s => polish(s, format === "carousel");
+  const d = { title: P(r.title || "") };
+  plats.forEach(p => { const x = r[p] || {}; d[p] = { caption: P(x.caption || ""), hashtags: cleanTags(x.hashtags) }; if (!d[p].caption) throw {code:"shape"}; });
+  if (format === "reel"){
+    d.hook = polish(r.hook); d.onScreen = (r.onScreen || []).map(polish).filter(Boolean); d.closingLine = polish(r.closingLine);
+    const va = r.va || {}; d.va = { visual: polish(va.visual), audio: polish(va.audio), pacing: polish(va.pacing) };
+    if (!d.hook || !d.onScreen.length) throw {code:"shape"};
+  }
+  if (format === "carousel"){ d.slides = (r.slides || []).map((s, i) => ({ role: P(s && s.role) || CAROUSEL_ROLES[i] || "", headline: P(s && s.headline), body: P(s && s.body) })).filter(s => s.headline); if (d.slides.length < 6) throw {code:"shape"}; d.slides = d.slides.slice(0, 6); }
+  if (format === "single"){ d.imageText = polish(r.imageText); if (!d.imageText) throw {code:"shape"}; }
+  if (format === "quote"){ d.quotes = (r.quotes || []).map(q => ({ text: polish(q && q.text).replace(/^[“"]|[”"]$/g, ""), structure: polish(q && q.structure), says: polish(q && q.says) })).filter(q => q.text); if (!d.quotes.length) throw {code:"shape"}; }
+  return d;
+}
+
+/* ---------- Generate ---------- */
+const ERR = {
+  not_granted: "The studio needs your permission to use Claude. Reload the page and choose Allow when asked.",
+  sampling_disabled: "Claude isn’t available on this account right now.",
+  rate_limited: "You’ve hit a usage limit. Wait a little, then try again.",
+  session_expired: "Your session has expired. Sign in to Claude again, then reload.",
+  refused: "Claude declined that brief. Try rewording the topic.",
+  invalid_json: "The draft came back in the wrong shape. Press Generate to try again.",
+  shape: "The draft came back incomplete. Press Generate to try again.",
+  empty_completion: "Nothing came back. Try a shorter or simpler brief.",
+  prompt_too_large: "Your library is too big to send in full. Narrow the subtopic and try again.",
+  upstream_error: "The connection dropped. Press Generate to try again."
+};
+function setBusy(on, msg){ $("#generate").disabled = on; $("#stop").hidden = !on; const s = $("#status"); s.classList.remove("err"); s.textContent = msg || ""; }
+function showErr(msg){ const s = $("#status"); s.classList.add("err"); s.textContent = msg; }
+
+function buildPrompt(brief, extra){
+  const subs = brief.subtopics || [];
+  const used = usedList(subs, brief.excludeId);
+  const needQuotes = brief.format === "quote" || subs.includes("quotes");
+  const isCar = brief.format === "carousel";
+  const needProof = isCar || brief.audience !== "her" || subs.includes("tmr") || subs.includes("matrescence");
+  return [
+    VOICE,
+    subs.length ? subs.map(k => SUBTOPICS[k].ctx).join("\n\n") + (subs.length > 1 ? "\n\nCOMBINE these subtopics into ONE coherent piece; don't cover them one after another." : "") : "SUBTOPIC: open. Follow the topic.",
+    isCar ? CAROUSEL_BRAIN : "",
+    !isCar && subs.includes("tmr") ? "VOICE NOTE: The Motherhood Rework is selected, so the woman reading is at the centre (\"you\" and the community \"us\"). Sara's lived detail can appear, told so she sees herself in it." : "",
+    needQuotes ? QUOTE_METHOD : "",
+    needProof ? PROOF_BANK : "Do not use statistics.",
+    isCar ? "STYLE OVERRIDE: For this carousel only, spaced em dashes ( — ) are allowed as the CAROUSEL GENERATION ENGINE says, and the closing community question replaces the reflection rule. Everything else in the voice stands." : "STYLE OVERRIDE: Any source above that uses em dashes is overridden. Never use em or en dashes.",
+    AUD[brief.audience],
+    "PLATFORMS: " + brief.platforms.map(p => PLAT_NAME[p]).join(" and ") + (brief.platforms.length > 1 ? ". Write each platform's text natively for that platform. They share the same idea but must not share sentences." : "."),
+    used.n ? `ALREADY USED. Sara has ${used.n} pieces in her library. Below are their titles and hooks. Your piece must take a different angle, a different opening moment, and must not reuse or closely paraphrase any of these hooks, lines or images:\n${used.text}` : "",
+    extra || "",
+    "Reply with ONLY a JSON object with exactly these keys:\n{\n" + shapeFor(brief.format, brief.platforms, brief.slides, brief.quotes) + "\n}"
+  ].filter(Boolean).join("\n\n");
+}
+
+async function run(mode, instruction){
+  const sample = await samplePromise;
+  if (!sample){ showErr("Generating works when this page is opened in Claude. The example shows what you’ll get."); return; }
+  syncEdits();
+  let brief;
+  if (mode === "generate"){
+    const topic = $("#topic").value.trim();
+    if (!topic && !subs.length){ showErr("Add a topic or raw thought, or pick a subtopic."); $("#topic").focus(); return; }
+    brief = { format: fmt, platforms: plat === "both" ? ["instagram","linkedin"] : [plat], subtopics: subs.slice(), topic, moment: $("#moment").value.trim(), audience: $("#audience").value, slides: 6, quotes: $("#quoteCount").value };
+  } else {
+    if (current.example) return;
+    brief = { format: current.format, platforms: current.platforms, subtopics: current.subtopics || [], topic: current.topic, moment: current.moment, audience: current.audience || "her", slides: 6, quotes: current.data.quotes ? current.data.quotes.length : $("#quoteCount").value };
+  }
+  if (mode === "refine") brief.excludeId = current.id;
+
+  const topicLine = brief.topic ? "TOPIC OR RAW THOUGHT: " + brief.topic : "TOPIC: choose a fresh, specific angle within the subtopic(s) that is not in the ALREADY USED list.";
+  const momentLine = brief.moment ? "REAL MOMENT FROM SARA’S LIFE (build the Moment beat from it and keep its details): " + brief.moment : "No moment supplied. Open with a specific, plausible lived moment she'd recognise, in first person as Sara, without inventing named people or new facts about her family.";
+  let extra = topicLine + "\n" + momentLine;
+  if (mode === "new") extra += "\nThis is a fresh version. Use a completely different angle, moment and hook from anything already used.";
+  if (mode === "refine") extra = "Here is the current draft as JSON:\n" + JSON.stringify(current.data) + "\n\nRewrite it following this note from Sara: “" + instruction + "”. Keep what already works and keep the same JSON shape.";
+
+  ctl = new AbortController();
+  setBusy(true, mode === "refine" ? "Rewriting…" : "Writing in your voice…");
+  try {
+    let data = normalise(brief.format, brief.platforms, await sample.json(buildPrompt(brief, extra), { signal: ctl.signal, cache: false }));
+    let repeats = findRepeats(unitsOf(brief.format, data), brief.excludeId);
+    if (repeats.length){
+      // One automatic second attempt, naming exactly what overlapped.
+      setBusy(true, "That overlapped with your library. Writing a fresher version…");
+      const lines = repeats.flatMap(r => r.reasons.map(x => "- " + x.unit.label + ": “" + x.unit.text.slice(0, 160) + "” (" + x.why + ", matches “" + (r.item.title || "") + "”)")).slice(0, 12).join("\n");
+      const retry = extra + "\n\nYOUR PREVIOUS ATTEMPT REPEATED EXISTING CONTENT. Replace these completely with new wording and new images:\n" + lines;
+      const data2 = normalise(brief.format, brief.platforms, await sample.json(buildPrompt(brief, retry), { signal: ctl.signal, cache: false }));
+      const rep2 = findRepeats(unitsOf(brief.format, data2), brief.excludeId);
+      if (rep2.length <= repeats.length){ data = data2; repeats = rep2; }
+    }
+    const prevId = mode === "refine" ? current.id : null;
+    current = { format: brief.format, platforms: brief.platforms, subtopics: brief.subtopics, topic: brief.topic, moment: brief.moment, audience: brief.audience, data, repeats, status: "draft", id: prevId };
+    setBusy(false, "");
+    await store();
+    render();
+    $("#out").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start"});
+  } catch(e){
+    setBusy(false, "");
+    if (e && e.code === "cancelled") { $("#status").textContent = "Stopped."; return; }
+    showErr(ERR[e && e.code] || ERR.upstream_error);
+  }
+}
+
+/* ---------- Library (db) ---------- */
+function docFromCurrent(){
+  const d = current.data;
+  return { source: "studio", format: current.format, platforms: current.platforms, subtopics: current.subtopics || [], topic: current.topic || "", moment: current.moment || "", audience: current.audience || "her",
+    title: d.title || "", hooks: hooksOf(d), allText: allTextOf(d), data: d, status: current.status || "draft" };
+}
+async function store(){
+  if (!libRef) return;
+  try {
+    if (current.id){ await libRef.doc(current.id).update({ ...docFromCurrent(), updatedAt: new Date().toISOString() }); }
+    else { const ref = await libRef.add({ ...docFromCurrent(), createdAt: new Date().toISOString() }); current.id = ref.id; }
+  } catch(e){ toast(e && e.code === "quota_exceeded" ? "Library is full. Delete old drafts to keep saving." : "Couldn’t save to the library"); }
+}
+async function setStatus(id, status){
+  if (!id || !libRef) return;
+  try { await libRef.doc(id).update({ status, postedAt: status === "posted" ? new Date().toISOString() : null }); if (current.id === id){ current.status = status; render(); } toast(status === "posted" ? "Marked as posted" : "Back to draft"); }
+  catch(e){ toast("Couldn’t update that piece"); }
+}
+
+async function initDb(){
+  db = await dbPromise;
+  if (!db){ dbState = "off"; renderLib(); return; }
+  libRef = db.collection("library");
+  cardRef = db.doc("settings/lastcard");
+  cardRef.onSnapshot(snap => { const v = snap.exists && snap.data() && snap.data().text; if (v && v !== lastCard){ lastCard = v; const n = $("#lastCardText"); if (n && document.activeElement !== n) n.textContent = v; } }, () => {});
+  libRef.orderBy("createdAt", "desc").limit(1000).onSnapshot(snap => {
+    dbState = "ready";
+    library = snap.docs.map(s => ({ id: s.id, ...s.data() }));
+    $("#libCount").textContent = library.length;
+    renderLib();
+  }, err => { dbState = "off"; renderLib(); });
+}
+
+let pendingDelete = null;
+function renderLib(){
+  const box = $("#libList"); box.textContent = "";
+  if (dbState === "loading"){ box.append(el("div", "empty", "Loading your library…")); return; }
+  if (dbState === "off"){ box.append(el("div", "empty", "The library opens when this page is viewed in Claude by you. Nothing can be stored or checked for repeats in this view.")); return; }
+  const q = words($("#libSearch").value).join(" "), f = $("#libFmt").value, s = $("#libSub").value, st = $("#libStatus").value;
+  const rows = library.filter(it => (!f || it.format === f) && (!s || (s === "-" ? !subsOf(it).length : subsOf(it).includes(s))) && (!st || (it.status || "draft") === st) && (!q || words(it.allText + " " + it.title).join(" ").includes(q)));
+  if (!library.length){ box.append(el("div", "empty", "Nothing here yet. Everything you generate is saved here automatically and checked against for repeats. Add past posts above so those count too.")); return; }
+  if (!rows.length){ box.append(el("div", "empty", "No pieces match those filters.")); return; }
+  rows.forEach(it => {
+    const row = el("article", "item");
+    const main = el("div");
+    main.append(el("h3", null, it.title || (it.hooks && it.hooks[0]) || "Untitled"));
+    main.append(el("p", null, (it.hooks || []).slice(0, 2).join(" · ") || (it.allText || "").slice(0, 200)));
+    const tags = el("div", "tags");
+    tags.append(el("span", "tag plain", FMT_NAME[it.format] || it.format));
+    (it.platforms || []).forEach(p => tags.append(platTag(p)));
+    subsOf(it).filter(k => SUBTOPICS[k]).forEach(k => tags.append(el("span", "tag example", SUBTOPICS[k].name)));
+    tags.append(el("span", "tag " + (it.status === "posted" ? "ok" : "plain"), it.status === "posted" ? "Posted" : it.source === "past" ? "Past post" : "Draft"));
+    const date = it.postedAt || it.createdAt; if (date) tags.append(el("span", "tag plain", new Date(date).toLocaleDateString("en-GB", {day:"numeric", month:"short", year:"numeric"})));
+    main.append(tags);
+    const side = el("div", "side");
+    if (it.data){ const o = el("button", "btn ghost small", "Open"); o.type = "button"; o.addEventListener("click", () => openItem(it)); side.append(o); }
+    else { side.append(copyBtn(() => it.allText || "", "Post")); }
+    if (it.source !== "past"){ const p = el("button", "btn ghost small", it.status === "posted" ? "Unmark posted" : "Mark posted"); p.type = "button"; p.addEventListener("click", () => setStatus(it.id, it.status === "posted" ? "draft" : "posted")); side.append(p); }
+    if (pendingDelete === it.id){
+      const c = el("div", "confirm"); c.append(el("span", null, "Delete for good?"));
+      const yes = el("button", "btn ghost small danger", "Delete"); yes.type = "button";
+      yes.addEventListener("click", async () => { try { await libRef.doc(it.id).delete(); if (current.id === it.id) current.id = null; toast("Deleted"); } catch(e){ toast("Couldn’t delete that piece"); } pendingDelete = null; renderLib(); });
+      const no = el("button", "btn ghost small", "Keep"); no.type = "button"; no.addEventListener("click", () => { pendingDelete = null; renderLib(); });
+      c.append(yes, no); side.append(c);
+    } else { const d = el("button", "btn ghost small danger", "Delete"); d.type = "button"; d.addEventListener("click", () => { pendingDelete = it.id; renderLib(); }); side.append(d); }
+    row.append(main, side); box.append(row);
+  });
+}
+function openItem(it){
+  current = { id: it.id, format: it.format, platforms: it.platforms || ["instagram"], subtopics: subsOf(it), topic: it.topic, moment: it.moment, audience: it.audience, data: JSON.parse(JSON.stringify(it.data)), status: it.status, repeats: findRepeats(unitsOf(it.format, it.data), it.id) };
+  showTab("create"); render();
+}
+
+async function importPast(){
+  const raw = $("#impText").value.trim(), st = $("#impStatus");
+  if (!raw){ st.textContent = "Paste at least one post."; return; }
+  if (!libRef){ st.textContent = "The library isn’t available in this view."; return; }
+  const posts = raw.split(/^\s*---\s*$/m).map(x => x.trim()).filter(Boolean);
+  const platform = $("#impPlat").value, format = $("#impFmt").value, subtopics = $("#impSub").value ? [$("#impSub").value] : [];
+  $("#impGo").disabled = true; st.textContent = "Adding " + posts.length + "…";
+  let ok = 0;
+  for (const p of posts){
+    const lines = p.split("\n").map(x => x.trim()).filter(Boolean);
+    try {
+      await libRef.add({ source: "past", format, platforms: [platform], subtopics, title: (lines[0] || "").slice(0, 90), hooks: lines.slice(0, 2), allText: p, status: "posted", createdAt: new Date().toISOString() });
+      ok++;
+    } catch(e){ if (e && e.code === "quota_exceeded") break; }
+  }
+  $("#impGo").disabled = false;
+  st.textContent = ok === posts.length ? "Added " + ok + " post" + (ok > 1 ? "s" : "") + "." : "Added " + ok + " of " + posts.length + ". Try the rest again.";
+  if (ok) $("#impText").value = "";
+}
+
+/* ---------- Tabs + wiring ---------- */
+function showTab(t){
+  $("#tabCreate").setAttribute("aria-selected", String(t === "create"));
+  $("#tabLib").setAttribute("aria-selected", String(t === "lib"));
+  $("#viewCreate").hidden = t !== "create"; $("#viewLib").hidden = t !== "lib";
+  if (t === "lib") renderLib();
+}
+$("#tabCreate").addEventListener("click", () => showTab("create"));
+$("#tabLib").addEventListener("click", () => showTab("lib"));
+["#libSearch","#libFmt","#libSub","#libStatus"].forEach(s => $(s).addEventListener("input", renderLib));
+$("#impGo").addEventListener("click", importPast);
+
+segWire("fmtSeg", v => { fmt = v; $("#quoteField").hidden = v !== "quote"; });
+segWire("platSeg", v => { plat = v; });
+
+const STARTERS = [
+  "Nobody prepares you for who you become",
+  "Mum guilt on the first day back",
+  "Matrescence, the word I wish I’d known",
+  "What our children learn watching us work",
+  "The invisible load in a 9am meeting",
+  "Asking for less than you need",
+  "Returning to work is an identity shift"
+];
+function renderStarters(){ const box = $("#starters"); box.textContent = ""; STARTERS.forEach(s => { const c = el("button", "chip", s); c.type = "button"; c.addEventListener("click", () => { $("#topic").value = s; $("#topic").focus(); }); box.append(c); }); }
+function renderSubs(){
+  const box = $("#subs"); box.textContent = "";
+  Object.entries(SUBTOPICS).forEach(([k, v]) => {
+    const on = subs.includes(k);
+    const b = el("button", "sub"); b.type = "button"; b.setAttribute("aria-pressed", String(on));
+    b.append(el("span", null, (on ? "✓ " : "") + v.name), el("small", null, v.desc));
+    b.addEventListener("click", () => { subs = on ? subs.filter(x => x !== k) : [...subs, k]; renderSubs(); });
+    box.append(b);
+  });
+  box.append(el("p", "hint", subs.length ? subs.length + " selected. Tap to remove." : "None selected. Write about anything."));
+}
+$("#generate").addEventListener("click", () => run("generate"));
+$("#stop").addEventListener("click", () => ctl && ctl.abort());
+
+renderSubs(); renderStarters(); render(); renderLib(); initDb();
+})();
+</script>
+
+</body></html>
